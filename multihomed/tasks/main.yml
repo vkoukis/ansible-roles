@@ -1,0 +1,8 @@
+---
+- name: Try different SSH configurations for a multihomed host
+  # We are forced to include a different file with tasks, instead of a block
+  # because of https://stackoverflow.com/questions/58908625/issue-looping-on-block-containing-a-set-of-tasks-in-ansible.
+  loop: '{{ multihomed }}'
+  loop_control:
+    loop_var: multihomed_entry
+  include_tasks: ssh.yml

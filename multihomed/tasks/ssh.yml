@@ -1,0 +1,28 @@
+---
+- name: Test a specific SSH configuration, if necessary
+  # This is a trick to stop at the first successful entry,
+  # by only running as long as entries are failing:
+  # https://medium.com/opsops/how-to-break-from-the-loop-in-ansible-1e8ebb92be0d
+  # because Ansible does not support a native break-from-loop mechanism:
+  # https://github.com/ansible/ansible/issues/51881
+  # Also note skipping a task actually messes up any registered variable:
+  # https://github.com/ansible/ansible/issues/69333, duplicate of
+  # https://github.com/ansible/ansible/issues/17500
+  when: not (multihomed_entry_result.skipped | default(false)) and multihomed_entry_result.failed | default(true)
+  block:
+  - name: Set all variables according to the current multihomed entry
+    # We are forced to iterate over individual dictionary entries,
+    # because we can't set variables using a dictionary directly:
+    # https://github.com/ansible/ansible/issues/36006, duplicate of
+    # https://github.com/ansible/ansible/issues/19084
+    ansible.builtin.set_fact:
+      '{{ item.key }}': '{{ item.value }}'
+    loop: '{{ multihomed_entry|dict2items }}'
+
+  - name: Test whether SSH connection to host works
+    ansible.builtin.wait_for_connection:
+      timeout: '{{ multihomed_ssh_timeout }}'
+    # Assume check mode is off for this task, we really need to test the connection
+    check_mode: false
+    register: multihomed_entry_result
+    ignore_errors: true
