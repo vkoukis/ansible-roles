@@ -1,0 +1,17 @@
+[Interface]
+Address = {{ wg.address }}
+{% if wg.listen_port is defined %}
+ListenPort = {{ wg.listen_port }}
+{% endif %}
+PostUp = wg set %i private-key {{ wg_private_key_file }}
+
+{% for peer in wg.peers %}
+[Peer]
+PublicKey = {{ peer.public_key }}
+{% if peer.endpoint is defined %}
+Endpoint = {{ peer.endpoint }}
+{% endif %}
+AllowedIPs = {{ peer.allowed_ips | join(", ") }}
+PersistentKeepalive = {{ peer.persistent_keepalive | default(wireguard_peer_persistent_keepalive) }}
+
+{% endfor %}

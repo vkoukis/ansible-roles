@@ -1,0 +1,74 @@
+---
+# We assume variable "wg" is a dict corresponding to the WireGuard interface
+# we are currently configuring.
+
+- block:
+  - name: Derive public key from private key
+    # This is critical: We do not want to log any operation that
+    # touches the private key.
+    #
+    # Also note we explicitly pass the private key contents via stdin,
+    # to avoid leaking the key via "ps auxw" or similar methods:
+    # https://github.com/ansible/ansible/issues/14380#issuecomment-219056707
+    no_log: true
+    # Assume check mode is off for this task, we really need to test the connection
+    check_mode: false
+    # Run this command where Ansible itself runs, as an intermediate computation step:
+    delegate_to: localhost
+    # ...and never report any changes.
+    changed_when: false
+    ansible.builtin.command:
+      argv:
+      - wg
+      - pubkey
+      stdin: '{{ wg.private_key }}'
+    register: wg_public_key_res
+  # In case of failure, we still want to show stderr to the user, even when using no_log.
+  # So, we do it explicitly.
+  rescue:
+    - name: |
+        Running 'wg pubkey' failed. Please ensure the 'wg' utility exists,
+        and the private key is valid
+      ansible.builtin.fail:
+        msg: '{{ wg_public_key_res }}'
+
+- name: Set WireGuard private key filename and public key as fact
+  ansible.builtin.set_fact:
+    # Ideally, we want to use a single file to store the same private key
+    # when used across interfaces [i.e., the single private key of the host].
+    #
+    # A naive approach would be to hash the private key.
+    # This is a big no-no, it can potentially have disastrous consequences:
+    # https://crypto.stackexchange.com/questions/107763/is-it-safe-to-create-a-public-id-by-hashing-a-private-key
+    #
+    # Instead, we derive the public key [see above], hash it to derive
+    # the filename to use for the private key, and keep the last few characters.
+    wg_public_key: '{{ wg_public_key_res.stdout | trim }}'
+    wg_private_key_file: '/etc/wireguard/{{ (wg_public_key_res.stdout | trim | hash("sha256"))[-8:] }}.key'
+
+- name: Render private key into distinct file
+  # This is critical: We do not want to log the contents
+  # of the templated file, this is the actual private key.
+  no_log: true
+  vars:
+    content: '{{ wg.private_key }}'
+  ansible.builtin.template:
+    src: content/content.j2
+    dest: '{{ wg_private_key_file }}'
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Configure WireGuard interface
+  ansible.builtin.template:
+    src: wg/wg-iface.j2
+    dest: /etc/wireguard/wg-{{ wg.name }}.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Ensure systemd service for WireGuard interface is enabled and started
+  ansible.builtin.systemd_service:
+    name: wg-quick@wg-{{ wg.name }}
+    state: started
+    enabled: true

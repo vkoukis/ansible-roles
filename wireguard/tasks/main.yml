@@ -1,0 +1,14 @@
+---
+- name: Configure WireGuard interfaces
+  tags: wireguard
+  loop: '{{ wireguard }}'
+  # This is critical: Ansible will log each item by default,
+  # we have to censor this so we do not leak the "private_key" field
+  # of each dict / WG interface.
+  no_log: true
+  loop_control:
+    loop_var: wg
+  include_tasks:
+    file: wg.yml
+    apply:
+      tags: wireguard
