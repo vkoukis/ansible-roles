@@ -45,6 +45,7 @@
     # the filename to use for the private key, and keep the last few characters.
     wg_public_key: '{{ wg_public_key_res.stdout | trim }}'
     wg_private_key_file: '/etc/wireguard/{{ (wg_public_key_res.stdout | trim | hash("sha256"))[-8:] }}.key'
+    wg_public_key_file: '/etc/wireguard/{{ (wg_public_key_res.stdout | trim | hash("sha256"))[-8:] }}.pub'
 
 - name: Render private key into distinct file
   # This is critical: We do not want to log the contents
@@ -58,6 +59,16 @@
     owner: root
     group: root
     mode: '0600'
+
+- name: Render public key into distinct file
+  vars:
+    content: '{{ wg_public_key }}'
+  ansible.builtin.template:
+    src: content/content.j2
+    dest: '{{ wg_public_key_file }}'
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Configure WireGuard interface
   ansible.builtin.template:
