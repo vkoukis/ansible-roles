@@ -1,0 +1,4 @@
+---
+- name: Disable IPv6 on host
+  tags: ipv6-disable
+  import_tasks: ipv6.yml

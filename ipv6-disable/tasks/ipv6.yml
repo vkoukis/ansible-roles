@@ -1,0 +1,12 @@
+---
+- name: Configure IPv6 via sysctl
+  ansible.builtin.template:
+    src: sysctl/98-ipv6.conf.j2
+    dest: /etc/sysctl.d/98-ipv6.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart-sysctl
+
+- name: Flush handlers to enforce IPv6 configuration
+  ansible.builtin.meta: flush_handlers

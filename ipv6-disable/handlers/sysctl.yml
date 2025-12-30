@@ -1,0 +1,6 @@
+---
+- name: restart-sysctl
+  ansible.builtin.systemd_service:
+    name: systemd-sysctl
+    enabled: true
+    state: restarted
