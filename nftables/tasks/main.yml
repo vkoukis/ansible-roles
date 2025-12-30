@@ -1,0 +1,4 @@
+---
+- name: Configure nftables
+  tags: nftables
+  ansible.builtin.import_tasks: nftables.yml

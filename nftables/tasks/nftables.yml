@@ -1,0 +1,21 @@
+---
+- name: Ensure nftables is installed
+  ansible.builtin.package:
+    name: nftables
+    state: present
+
+- name: Deploy nftables configuration file
+  ansible.builtin.template:
+    src: "{{ nftables_config_file }}"
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/nft -c -f %s
+  notify: restart-nftables
+
+- name: Ensure nftables is enabled and started
+  ansible.builtin.service:
+    name: nftables
+    state: started
+    enabled: yes
