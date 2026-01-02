@@ -6,4 +6,7 @@
   loop: '{{ multihomed }}'
   loop_control:
     loop_var: multihomed_entry
-  include_tasks: ssh.yml
+  include_tasks:
+    file: ssh.yml
+    apply:
+      tags: multihomed
