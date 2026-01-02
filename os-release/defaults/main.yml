@@ -1,0 +1,15 @@
+---
+os_debian_src: true
+os_debian_autoremove: true
+os_debian_dist_upgrade: true
+os_debian_remove_sources_list: true
+os_debian_components:
+- main
+- contrib
+- non-free
+- non-free-firmware
+os_debian_security: true
+os_debian_updates: true
+os_debian_proposed_updates: true
+os_debian_backports: true
+os_debian_debug: false

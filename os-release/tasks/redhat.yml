@@ -1,0 +1,4 @@
+---
+- name: This role actually does not support Red Hat-based systems yet
+  ansible.builtin.fail:
+    msg: This role actually does not support Red Hat-based systems yet

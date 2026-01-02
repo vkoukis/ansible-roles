@@ -1,0 +1,49 @@
+{{ ansible_managed | comment -}}
+# For a description of the format of this file,
+# see https://wiki.debian.org/SourcesList
+
+# release, release-updates, release-proposed-updates, release-backports
+# See https://wiki.debian.org/DebianStable
+# See https://wiki.debian.org/StableUpdates
+# See https://wiki.debian.org/StableProposedUpdates
+# See https://wiki.debian.org/Backports
+Types: deb{% if os_debian_src %} deb-src{% endif +%}
+URIs: https://deb.debian.org/debian
+Suites: {{ os_release -}}
+{% if os_debian_updates %} {{ os_release }}-updates{% endif %}
+{% if os_debian_proposed_updates %} {{ os_release }}-proposed-updates{% endif %}
+{% if os_debian_backports %} {{ os_release }}-backports{% endif +%}
+Components: {{ os_debian_components | join(" ") }}
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+# release-security
+# See https://wiki.debian.org/DebianSecurity
+{% if os_debian_security %}
+Types: deb{% if os_debian_src %} deb-src{% endif +%}
+URIs: https://security.debian.org/debian-security
+Suites: {{ os_release }}-security
+Components: {{ os_debian_components | join(" ") }}
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+{% endif %}
+
+# Debug packages
+# See https://wiki.debian.org/AutomaticDebugPackages
+{% if os_debian_debug %}
+Types: deb{% if os_debian_src %} deb-src{% endif +%}
+URIs: https://deb.debian.org/debian-debug
+Suites: {{ os_release + "-debug" -}}
+{% if os_debian_proposed_updates %} {{ os_release }}-proposed-updates-debug{% endif %}
+{% if os_debian_backports %} {{ os_release }}-backports-debug{% endif +%}
+Components: {{ os_debian_components | join(" ") }}
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+{% if os_debian_security %}
+# Debug packages for security
+# See https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=894081
+Types: deb{% if os_debian_src %} deb-src{% endif +%}
+URIs: https://deb.debian.org/debian-security-debug
+Suites: {{ os_release }}-security-debug
+Components: {{ os_debian_components | join(" ") }}
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+{% endif %}
+{% endif %}
