@@ -1,4 +1,4 @@
-{{ ansible_managed | comment -}}
+{{ ansible_managed | comment }}
 # For a description of the format of this file,
 # see https://wiki.debian.org/SourcesList
 
@@ -26,9 +26,9 @@ Components: {{ os_debian_components | join(" ") }}
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 {% endif %}
 
+{% if os_debian_debug %}
 # Debug packages
 # See https://wiki.debian.org/AutomaticDebugPackages
-{% if os_debian_debug %}
 Types: deb{% if os_debian_src %} deb-src{% endif +%}
 URIs: https://deb.debian.org/debian-debug
 Suites: {{ os_release + "-debug" -}}
