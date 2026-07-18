@@ -1,3 +1,4 @@
 ---
 multihomed: []
+multihomed_facts: {}
 multihomed_ssh_timeout: 5

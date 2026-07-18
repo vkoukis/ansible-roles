@@ -8,6 +8,10 @@
   # Also note skipping a task actually messes up any registered variable:
   # https://github.com/ansible/ansible/issues/69333, duplicate of
   # https://github.com/ansible/ansible/issues/17500
+  #
+  # Use distinct variable names for each step to avoid mutating
+  # multihomed_entry_result mid-block, which would cause the block's
+  # when condition to re-evaluate to false for subsequent tasks.
   when: not (multihomed_entry_result.skipped | default(false)) and multihomed_entry_result.failed | default(true)
   block:
   - name: Set all variables according to the current multihomed entry
@@ -24,5 +28,41 @@
       timeout: '{{ multihomed_ssh_timeout }}'
     # Assume check mode is off for this task, we really need to test the connection
     check_mode: false
-    register: multihomed_entry_result
+    register: multihomed_connection_result
     ignore_errors: true
+
+  - name: Gather facts from host
+    ansible.builtin.setup: {}
+    check_mode: false
+    when: multihomed_facts | length > 0
+
+  - name: Assert gathered facts match expected values
+    ansible.builtin.assert:
+      that:
+        - "ansible_facts[item.key] == item.value"
+      success_msg: >-
+        Fact assertion successful: found '{{ item.key }}' == '{{ item.value }}'
+      fail_msg: >-
+        Fact assertion failed: expected '{{ item.key }}' ==
+        '{{ item.value }}', got '{{ ansible_facts[item.key] }}'
+    loop: '{{ multihomed_facts | dict2items }}'
+    when: multihomed_facts | length > 0
+    check_mode: false
+    register: multihomed_facts_result
+    ignore_errors: true
+
+  - name: Mark connection as failed if SSH test or fact assertion failed
+    ansible.builtin.set_fact:
+      multihomed_entry_result:
+        failed: true
+    when: >-
+      multihomed_connection_result is failed or
+      (multihomed_facts_result is defined and multihomed_facts_result is failed)
+
+  - name: Mark connection as succeeded
+    ansible.builtin.set_fact:
+      multihomed_entry_result:
+        failed: false
+    when: >-
+      multihomed_connection_result is succeeded and
+      (multihomed_facts_result is not defined or multihomed_facts_result is succeeded)

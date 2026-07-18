@@ -1,9 +1,10 @@
 Role: multihomed-ssh
 ====================
 
-This role supports declaring multiple SSH endpoints for the same host and tries
-them out in order, until one of them succeeds; then, it updates the variables
-for this host so every subsequent connection to it uses the settings that
+This role supports declaring multiple SSH endpoints [actually, connection
+settings] for the same host and tries them out in order, until one of them
+succeeds; then, it updates the variables for this host so every subsequent
+connection to it uses the settings that
 worked.
 
 This is useful when you run Ansible in different locations, in which case you
@@ -29,7 +30,7 @@ multihomed:
 
 It is recommended you assign this role as early as possible in your playbook,
 to allow it to set host variables appropriately, so the rest of your playbook
-can SSH into the host seamlessly.
+can connect the host seamlessly.
 
 Make sure to also prevent Ansible from attempting to gather facts when
 assigning this role, since this role does not need them, and Ansible will
@@ -52,6 +53,13 @@ Role variables
   and try to connect to the host. If it succeeds, it will override the contents
   of the in-memory inventory to combine this specific dict with the host's
   variables for the remainder of this run, and move on.
+
+* `multihomed_facts`: An optional dictionary of fact name/value pairs to
+  assert after a successful connection to the host. When set, the role gathers
+  facts from the host and verifies that each key's gathered value matches the
+  expected value. If any assertion fails, the connection is treated as failed
+  and the role moves on to the next entry. This is useful to confirm you
+  connected to the intended host, not just any reachable one.
 
 More context
 ------------
