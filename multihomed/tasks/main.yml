@@ -11,6 +11,11 @@
     apply:
       tags: multihomed
 
+- name: Mark host as unreachable if no connection settings worked
+  ansible.builtin.group_by:
+    key: unreachable
+  when: multihomed | length > 0 and multihomed_entry_result.failed | default(false)
+
 - name: Ignore host if no connection settings worked
   ansible.builtin.meta: end_host
   when: multihomed | length > 0 and multihomed_entry_result.failed | default(false)
