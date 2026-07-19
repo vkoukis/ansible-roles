@@ -10,3 +10,7 @@
     file: ssh.yml
     apply:
       tags: multihomed
+
+- name: Ignore host if no connection settings worked
+  ansible.builtin.meta: end_host
+  when: multihomed | length > 0 and multihomed_entry_result.failed | default(false)
