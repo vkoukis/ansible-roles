@@ -7,10 +7,13 @@
     group: root
     mode: "0644"
 
-- name: Ensure /etc/apt/sources.list does not exist (optional)
-  ansible.builtin.file:
-    path: /etc/apt/sources.list
-    state: '{{"absent" if os_debian_remove_sources_list else "file" }}'
+- name: Deploy hardcoded template at /etc/apt/sources.list
+  ansible.builtin.template:
+    src: "{{ os_family }}/sources.list.j2"
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: "0644"
 
 - name: 'Run "apt dist-upgrade" to upgrade all OS packages'
   ansible.builtin.apt:

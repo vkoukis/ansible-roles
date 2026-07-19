@@ -16,9 +16,9 @@ Suites: {{ os_release -}}
 Components: {{ os_debian_components | join(" ") }}
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
+{% if os_debian_security %}
 # release-security
 # See https://wiki.debian.org/DebianSecurity
-{% if os_debian_security %}
 Types: deb{% if os_debian_src %} deb-src{% endif +%}
 URIs: https://security.debian.org/debian-security
 Suites: {{ os_release }}-security

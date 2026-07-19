@@ -19,6 +19,9 @@ The names of all variables are case-insensitive.
   codename (e.g., `bookworm`) or the generic name of Debian distribution
   (`stable`, `testing`, `unstable`).
 
+Ubuntu nodes use `os_ubuntu_*` host variables when applicable, and fall back
+to `os_debian_*` ones if they have not been defined.
+
 There are also family- and distribution-specific variables.
 All of these have sensible defaults.
 Currently, they are:
@@ -54,3 +57,17 @@ Currently, they are:
     * `os_debian_debug`: Whether to enable the [Debian debug
       packages](https://wiki.debian.org/AutomaticDebugPackages) repositories.
       (default: `false`)
+  * **Ubuntu:**
+    * `os_ubuntu_src`: Whether to configure repositories for Ubuntu source
+      packages so `apt source` works. Falls back to `os_debian_src`.
+      (default: `true`)
+    * `os_ubuntu_components`: A list of components to activate in APT.
+      (default: `main`, `universe`, `restricted`, `multiverse`)
+    * `os_ubuntu_security`: Whether to enable the Ubuntu security repository.
+      Falls back to `os_debian_security`. (default: `true`)
+    * `os_ubuntu_updates`: Whether to enable the Ubuntu updates repository.
+      Falls back to `os_debian_updates`. (default: `true`)
+    * `os_ubuntu_proposed`: Whether to enable the Ubuntu proposed repository.
+      (default: `false`)
+    * `os_ubuntu_backports`: Whether to enable the Ubuntu backports repository.
+      Falls back to `os_debian_backports`. (default: `true`)

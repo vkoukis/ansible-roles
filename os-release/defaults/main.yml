@@ -13,3 +13,13 @@ os_debian_updates: true
 os_debian_proposed_updates: true
 os_debian_backports: true
 os_debian_debug: false
+os_ubuntu_src: true
+os_ubuntu_components:
+- main
+- universe
+- restricted
+- multiverse
+os_ubuntu_security: true
+os_ubuntu_updates: true
+os_ubuntu_proposed: false
+os_ubuntu_backports: true
